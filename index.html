@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>TOTEC2014　フロントエンド - 初級者向け - </title>
+
+		<meta name="author" content="Akihiro Yamamoto">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+  				<section data-markdown
+         		data-separator="\n---\n$"
+           		data-vertical="\n--\n">
+	<script type="text/template">
+
+
+## TOTEC2014 front-end Review
+
+----
+
+```javascript
+name = '山本 晃大'
+occupation = 'エンジニアセクション'
+properties = [
+	'JSer', 'Underscore.js', 'Node.js'
+	'14Fが好き（書籍的な意味で）'
+	'PHPer（過去の話）', 'isucon'
+]
+```
+![アイコン](img/icon.jpg)
+#### Created By　Akihiro Yamamoto
+
+---
+
+## アジェンダ
+
+----
+
+1. どんな大会なのか
+1. 考えたこと
+1. やったこと
+1. やったこと具体例
+1. まとめ
+
+---
+
+#### どんな大会なのか
+
+----
+
+## 何を競うの？
+--
+
+![個人成績画面](img/personal_score.jpg)
+--
+
+#### どんな大会なのか
+
+----
+
+* HTMLファイルサイズ
+* CSSファイルサイズ
+* JavaScriptファイルサイズ
+* 画像ファイルサイズ
+* リクエスト数
+* DOM要素数
+* JavaScriptのエラー有無（1つでもエラーがあればNG）
+* チューニング前後の表示差異(ImageMagickによる平均画素数比較で閾値を超えるとNG）
+--
+
+#### どんな大会なのか
+
+----
+
+* 11:00～18:00 の7時間に渡って競技が行われる
+* アメーバ水が飲み放題、お昼はサンドイッチ配布
+
+![部屋の様子](img/room.jpg)
+
+---
+
+#### 考えたこと
+
+----
+# (勝ちに行こう)
+--
+
+#### 考えたこと
+
+----
+* Try and Error をとにかく多く
+ * commit, pushを細かく刻む
+
+![commit回数](img/commit_count.jpg)
+--
+
+#### 考えたこと
+
+----
+* スコアにならないことは全て無視
+ * Response time
+ * リクエスト数の削減( 100point/req )
+
+![無視](http://www.poc39.com/wordpress/wp-content/uploads/2014/03/2014-03-08_20131203_57488.jpg)
+--
+
+#### 考えたこと
+
+----
+* 何よりも「ハマらない」こと
+ * 使い慣れたgruntの利用
+ * 経験がほぼ無かったCSS Spritesはスルー
+
+![grunt vs gulp](http://hunt.ghost.io/content/images/2014/May/grunt-vs-gulp.jpg)
+---
+
+
+#### やったこと
+
+----
+# 消す、纏める
+（100%これだけです）
+--
+
+#### やったこと
+
+----
+##### インフラチューニングの時のように
+# VarnishでFOOOO!!!
+##### というような華麗な技は無し
+![Varnish](http://www.harrison-hargreaves.com/catalog/images/ronseal-quick-drying-satin-varnish-750ml.jpg)
+--
+
+#### やったこと
+
+----
+とりあえず開始前に gulp-webserver の導入
+
+```javascript
+var gulp = require('gulp');
+var webserver = require('gulp-webserver');
+
+gulp.task('webserver', function() {
+	gulp.src('pu7mQgd')
+		.pipe(webserver({
+			livereload: true,
+			directoryListing: true,
+			port: 9999,
+			fallback: 'index.html'
+		})
+	);
+});
+
+gulp.task('default', ['webserver']);
+```
+--
+
+#### やったこと
+
+----
+* [html]不要CSS、JSファイルのloadを削除
+* [html]不要DOM、classの削除
+* [html]grunt-contrib-htmlminによるminify
+* [css]不要プロパティの削除
+* [css]grunt-contrib-cssminによるminify
+* [js]不要クラス、不要メソッドの削除
+* [js]grunt-contrib-uglifyによるminify
+* [画像]ImageMagickによる画像圧縮
+* [画像]pngquantによる画像圧縮
+* [その他]grunt-contrib-concatによるJS、CSSの結合
+--
+
+#### やったけどrevertしたこと
+
+----
+* cdnjsからライブラリload
+ * 手っ取り早くminifyされたファイルが欲しかった
+ * HTMLのサイズが小さくならない＋concat不可
+ * 故に、明らかな悪手
+
+![cdnjs](http://www.portalzine.de/wp-content/uploads/sites/3/2014/06/cdnjs-1024x576.jpg)
+--
+
+#### やったけどrevertしたこと
+
+----
+* zepto.jsの利用
+ * JSエラーが大量に出る＋何か厄介そう
+ * ということで、１分で諦める
+
+![cdnjs](http://www.webresourcesdepot.com/wp-content/uploads/zepto-js.jpg)
+--
+
+#### やったけどrevertしたこと
+
+----
+* benchmarkツールの死角を突いて画像を超圧縮！！
+ * 良い戦略だった
+ * 審査員から「失格にするよ」と脅されたので断念
+
+```
+convert -quality 10 ./images/features/2.png ./img_o/features/2.jpg
+convert -quality 10 ./images/features/3.png ./img_o/features/3.jpg
+convert -quality 10 ./images/features/4.png ./img_o/features/4.jpg
+convert -quality 10 ./images/features/5.png ./img_o/features/5.jpg
+```
+
+--
+
+#### やったけどrevertしたこと
+
+----
+これが元画像で...
+![BEFORE](img/before.png)
+
+--
+
+#### やったけどrevertしたこと
+
+----
+##### 実際に提出しようとした画像がこちら
+(ファイルサイズ 1/50)
+![AFTER](img/after.jpg)
+
+---
+
+### やったこと具体例
+
+----
+1. 不要なloadを減らす
+1. ライブラリ本体の削減
+1. gruntを使う
+1. JS, HTML, CSSのMinify, concat
+1. 不要DOM,Classの削除
+1. 画像圧縮
+--
+
+#### やったこと具体例 | 不要なloadを減らす
+
+----
+##### before（cssも同様）
+
+```javascript
+(24ファイル。多すぎるので2列)
+
+"javascripts/jquery-1.11.1.js", "javascripts/underscore.js"
+"javascripts/underscore.string.js", "javascripts/backbone.js"
+"javascripts/bootstrap.js", "javascripts/coffee-script.js"
+"javascripts/createjs-2013.12.12.min.js", "javascripts/imgLiquid.js"
+"javascripts/jquery-ui.js", "javascripts/jquery.bxslider.js"
+"javascripts/jquery.cycle.all.js", "javascripts/jquery.ellipsis.js"
+"javascripts/jquery.heightLine.js", "javascripts/jquery.localscroll.js"
+"javascripts/jquery.maximage.js", "javascripts/jquery.scrollto.js"
+"javascripts/jquery.slides.js", "javascripts/jquery.smarttruncation.js"
+"javascripts/masonry.pkgd.js", "javascripts/paper-full.js"
+"javascripts/tabulous.js", "javascripts/trunk8.js"
+"javascripts/jquery.smoothScroll.js", "javascripts/modernizr.custom.86912.js"
+```
+--
+
+#### やったこと具体例 | 不要なloadを減らす
+
+----
+##### after
+
+```javascript
+(14ファイル)
+
+'javascripts/jquery-1.11.1.js',
+'javascripts/underscore.js',
+'javascripts/underscore.string.js',
+'javascripts/backbone.js',
+'javascripts/coffee-script.js',
+'javascripts/imgLiquid.js',
+'javascripts/jquery.bxslider.js',
+'javascripts/jquery.ellipsis.js',
+'javascripts/jquery.heightLine.js',
+'javascripts/jquery.localscroll.js',
+'javascripts/jquery.maximage.js',
+'javascripts/jquery.scrollto.js',
+'javascripts/masonry.pkgd.js',
+'javascripts/jquery.smoothScroll.js'
+```
+--
+
+#### やったこと具体例 | ライブラリ本体の削減
+
+----
+##### ex) backbone.js: 61kb => 9kb
+![backbone](img/backbone_slim.jpg)
+##### ex) bootstrap.css: 133kb => 2kb
+![backbone](img/bootstrap_before.jpg)
+![backbone](img/bootstrap_after.jpg)
+
+=>　ライブラリ本体もゴリゴリ削る
+--
+
+#### やったこと具体例 | gruntを使う
+
+----
+* これらの作業は割と序盤からwatchしながら行った。
+
+```javascript
+watch: {
+	js: {
+		files: 'javascripts/*.js',
+		tasks: ['concat:js', 'uglify']
+	},
+	css: {
+		files: 'stylesheets/*.css',
+		tasks: ['concat:css', 'cssmin']
+	},
+	html: {
+		files: './src/index.html',
+		tasks: ['htmlmin']
+	}
+}
+```
+
+* 反省：序盤ではbuildに結構な時間がかかった。
+--
+
+#### やったこと具体例 | gruntを使う
+
+----
+* 反省：JSエラーが見辛いこと、この上なし
+![メッセージ](img/error_message.jpg)
+![コード](img/error_code.jpg)
+
+* 苦肉の策で、いじるファイルは外出しして作業
+
+```html
+<scrip src="javascripts/backbone.js"></scrip>
+<scrip src="min/jm.js"></scrip>
+```
+--
+
+#### 補足（今日知りました）
+
+----
+#### _sourceMap_ オプションを使いましょう（自戒）
+```javascript
+uglify: {
+	dist: {
+		options: {
+			// 同階層にjm.js.mapファイルが生成される
+			//# sourceMappingURL=jm.js.map というリンクがjm.jsの末尾に挿入される
+			sourceMap: true
+		},
+		files: {
+			'min/jm.js': 'concat/j.js'
+		}
+	}
+},
+```
+--
+
+#### 補足（今日知りました）
+
+----
+#### 使うと、こうなります。
+![メッセージ](img/error_message_with_sourcemap.jpg)
+![コード](img/error_code_with_sourcemap.jpg)
+--
+
+#### やったこと具体例 | JS, HTML, CSSのMinify, concat
+
+----
+
+### gruntでファイル変更を監視しつつ...
+
+--
+```javascript
+concat: {
+	js: {
+		src : [
+			'javascripts/jquery-1.11.1.js',
+			'javascripts/underscore.js',
+			'javascripts/underscore.string.js',
+			...(略)...
+		],
+		dest: 'concat/j.js'
+	},
+	css: {
+		src : [
+			'stylesheets/bootstrap.css',
+			'stylesheets/jquery.bxslider.css',
+			'stylesheets/main.css'
+		],
+		dest: 'concat/c.css'
+	}
+},
+```
+--
+```javascript
+uglify: {
+	dist: {
+		files: {
+			'min/jm.js': 'concat/j.js'
+		}
+	}
+},
+htmlmin: {
+	dist: {
+		options: {
+			removeComments: true,
+			collapseWhitespace: true
+		},
+		files: {
+			'./index.html': 'src/index.html'
+		}
+	}
+},
+cssmin: {
+	combine: {
+		files: {
+			'min/c.css': 'concat/c.css'
+		}
+	}
+},
+```
+--
+#### やったこと具体例 | 不要DOM,Classの削除
+
+----
+##### BEFORE
+
+```html
+<section class="Sitesummary">
+	<div class="Sitesummary-element-container">
+		<div class="inner">
+			<div class="Sitesummary-permalink-block">
+				<h1>
+					<div class="Sitesummary-text-block">
+						<span class="Sitesummary-button-spot">
+							<img src="images/visual-title.png" alt="Pashalistock Tokyo.
+							100% Free Stock Photos. Every. Single. Week.
+							Everything you need for your creative projects, all public domain images!">
+						</span>
+					</div>
+				</h1>
+			</div>
+		</div>
+	</div>
+</section>
+```
+--
+
+#### やったこと具体例 | 不要DOM,Classの削除
+
+----
+##### AFTER
+
+```html
+<section class="Sitesummary">
+		<div class="inner">
+				<h1>
+					<img src="images/visual-title.png">
+				</h1>
+		</div>
+</section>
+```
+--
+
+#### やったこと具体例 | 画像圧縮
+
+----
+ImageMagick, pngquantの併用
+```sh
+convert -quality 75 ./images/visual-photo.png ./img_o/visual-photo.jpg
+convert -quality 75 ./images/features/1.png ./img_o/features/1.jpg
+convert -quality 75 ./images/features/2.png ./img_o/features/2.jpg
+convert -quality 75 ./images/features/3.png ./img_o/features/3.jpg
+convert -quality 75 ./images/features/4.png ./img_o/features/4.jpg
+convert -quality 75 ./images/features/5.png ./img_o/features/5.jpg
+
+pngquant --ext _.png images/photos/ *.png
+pngquant --ext _.png images/onlineshopitems/ *.png
+```
+（割と適当）
+---
+
+### まとめ
+
+----
+1. 正味作業時間への意識
+1. 不要なコードは書かない
+1. １度に１つのことだけをやる
+--
+
+#### まとめ
+
+----
+* 正味作業時間への意識
+ * ムダ：考えている *ふり*
+ * 付加価値のない作業：準備、調べもの、仕様確認
+ * 正味作業：意味のあるコードを書く
+
+![正味作業時間](http://www2a.biglobe.ne.jp/~qpon/toyota/kanban/text/kosu161.gif)
+--
+
+#### まとめ
+
+----
+* 不要なコードは書かない
+ * （後で使うかも！というのは甘えであり幻想では？）
+
+![ごみぜろ](http://www.tkz.or.jp/gomizero/images/top01_r1_c4.gif)
+--
+
+#### まとめ
+
+----
+* １度に１つのことだけをやる
+ * PDCAサイクルの早さが違う
+
+```javascript
+n = changedNumber
+complexity = Math.pow(2, n) - 1
+```
+
+![遅い](http://blogs.c.yimg.jp/res/blog-0a-52/tadaaki_naomi/folder/467078/26/39263226/img_0)
+---
+
+### ご清聴ありがとうございました
+
+
+
+
+
+
+    </script>
+
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				slideNumber: true,  // Display the page number of the current slide
+				theme: Reveal.getQueryHash().theme,  // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default',  // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
